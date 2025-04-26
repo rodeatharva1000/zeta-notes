@@ -1,0 +1,64 @@
+{% block title %}Show Content{% endblock %}
+
+{% block content %} 
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f6f8;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .content-container {
+        max-width: 800px;
+        margin: 20px auto;
+    }
+
+    .card {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .card img {
+        display: block;
+        margin: 0 auto 10px;
+        max-width: 100px;
+        height: auto;
+        border-radius: 8px;
+    }
+
+    .card p {
+        margin: 5px 0;
+    }
+
+    .card a {
+        display: inline-block;
+        margin-top: 10px;
+        text-decoration: none;
+        color: #007BFF;
+        font-weight: bold;
+    }
+
+    .card a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="content-container">
+    {% for c in content %}
+        <div class="card">
+            <img src="{{ c.image.url }}" alt="Image">
+            <p><strong>Description:</strong> {{ c.description }}</p>
+            <p><strong>Uploaded By:</strong> {{ c.uploaded_by.username }}</p>
+            <p><strong>Uploaded At:</strong> {{ c.uploaded_at }}</p>
+            <p><strong>Subject:</strong> {{ c.subject }}</p>
+            <a href="{% url 'detail' c.id %}">View Details</a>
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PDF Viewer + Chatbot Section</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      font-family: sans-serif;
+    }
+    .pdf-viewer {
+      flex: 2;
+      border-right: 2px solid #ddd;
+      height: 100%;
+    }
+    .chatbot-section {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background-color: #f9f9f9;
+    }
+    .chatbot-section h2 {
+      margin-top: 0;
+    }
+    .chatbox {
+      display: flex;
+      flex-direction: column;
+      height: 95%;
+    }
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    .user-message {
+      background-color: #d3f8d3;
+      word-break: break-word; 
+      white-space: pre-wrap;  
+    }
+    
+    .user-message {
+      background-color: #d3f8d3;
+    }
+    .bot-message {
+      background-color: #f8f1d3;
+      font-family: 'Courier New', Courier, monospace;
+      white-space: pre-wrap; 
+    }
+
+    .bot-message pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+
+    
+    
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PDF Viewer -->
+  <div class="pdf-viewer">
+    <iframe src="{{ file_url }}" width="100%" height="100%" frameborder="0"></iframe>
+  </div>
+
+  <!-- Chatbot Section -->
+  <div class="chatbot-section">
+    <h2>Chatbot</h2>
+    <div class="chatbox">
+      <div id="messages" class="messages"></div>
+      <input type="text" id="user-input" placeholder="Ask something..."/>
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const userMessage = document.getElementById('user-input').value;
+      const messagesContainer = document.getElementById('messages');
+
+      if (userMessage) {
+        const userMessageDiv = document.createElement('div');
+        userMessageDiv.classList.add('user-message');
+        userMessageDiv.textContent = userMessage;
+        messagesContainer.appendChild(userMessageDiv);
+
+        document.getElementById('user-input').value = '';
+
+        try {
+          const response = await fetch('/materials/chatbot/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')  // CSRF token if needed
+            },
+            body: JSON.stringify({ message: userMessage })
+          });
+
+          const data = await response.json();
+
+          if (data.reply) {
+            const botMessageDiv = document.createElement('div');
+            botMessageDiv.classList.add('bot-message');
+            const pre = document.createElement('pre'); 
+            pre.textContent = data.reply; 
+            botMessageDiv.appendChild(pre); 
+            messagesContainer.appendChild(botMessageDiv);
+          }
+        } catch (error) {
+          const errorDiv = document.createElement('div');
+          errorDiv.classList.add('bot-message');
+          errorDiv.textContent = 'Oops! Something went wrong.';
+          messagesContainer.appendChild(errorDiv);
+        }
+      }
+    }
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+  </script>
+
+</body>
+</html>
